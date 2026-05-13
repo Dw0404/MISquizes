@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Marketing Information Systems MCQ Quiz</title>
+
   <style>
     :root {
       --bg: #f4f7fb;
@@ -39,7 +40,7 @@
 
     .quiz-shell {
       width: 100%;
-      max-width: 900px;
+      max-width: 950px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 22px;
@@ -239,11 +240,6 @@
       background: #ffffff;
     }
 
-    .result-card h2 {
-      font-size: clamp(1.5rem, 4vw, 2.3rem);
-      margin: 0 0 10px;
-    }
-
     .big-score {
       font-size: clamp(2.2rem, 8vw, 4.5rem);
       font-weight: 900;
@@ -280,12 +276,66 @@
       margin-bottom: 4px;
     }
 
-    .sr-only {
-      position: absolute;
-      left: -10000px;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
+    /* Spreadsheet display */
+    .sheet-note {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .sheet-box {
+      overflow-x: auto;
+      margin: 14px 0 22px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.02);
+    }
+
+    .sheet-table {
+      width: 100%;
+      min-width: 1050px;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .sheet-table caption {
+      caption-side: top;
+      text-align: left;
+      padding: 10px;
+      font-weight: 900;
+      background: #eff6ff;
+      color: #1e3a8a;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sheet-table th,
+    .sheet-table td {
+      border: 1px solid var(--border);
+      padding: 7px 8px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .sheet-table th {
+      background: #eaf1ff;
+      font-weight: 800;
+    }
+
+    .sheet-table td.num,
+    .sheet-table th.num {
+      text-align: right;
+    }
+
+    .formula-box {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.95rem;
+      overflow-x: auto;
+      margin: 10px 0 16px;
     }
 
     @media (max-width: 600px) {
@@ -312,18 +362,23 @@
       .answer-btn {
         padding: 13px;
       }
+
+      .sheet-table {
+        font-size: 0.78rem;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="quiz-shell">
     <header>
       <h1>Marketing Information Systems MCQ Quiz</h1>
-      <p>Interactive revision quiz based on Year 1 MIS exam topics.</p>
+      <p>Interactive Year 1 MIS revision quiz with spreadsheet questions included.</p>
     </header>
 
     <div class="top-row" aria-live="polite">
-      <div class="meta" id="questionCounter">Question 1 of 1</div>
+      <div class="meta" id="questionCounter">Question 1</div>
       <div class="score-pill" id="scoreTracker">Score: 0</div>
     </div>
 
@@ -336,19 +391,144 @@
 
   <script>
     /*
-      HOW TO EDIT THIS QUIZ
-      ---------------------
-      Add, remove, or edit question objects in the quizData array below.
+      EDITING GUIDE
+      -------------
+      To edit questions, change the quizData array below.
 
-      Each question needs:
-      - topic: short label shown above the question
-      - question: the question text
-      - options: exactly four answer choices unless you intentionally want a different number
-      - correct: the exact text of the correct option
-      - explanation: short feedback shown after answering
-
-      The answer order is randomized automatically, while the correct answer remains mapped.
+      Each question has:
+      topic: topic label
+      question: question text
+      options: answer choices
+      correct: correct answer text
+      explanation: feedback after answering
+      exhibit: optional. Use "wages" to show the spreadsheet table.
     */
+
+    const wagesSpreadsheetHTML = `
+      <p class="sheet-note">Use this wages spreadsheet to answer the question.</p>
+
+      <div class="sheet-box">
+        <table class="sheet-table">
+          <caption>Wages Sheet</caption>
+          <thead>
+            <tr>
+              <th>Staff no</th>
+              <th>Name</th>
+              <th class="num">Wage rate</th>
+              <th class="num">Hours worked</th>
+              <th class="num">Gross wages</th>
+              <th class="num">Sales</th>
+              <th class="num">Commission rate</th>
+              <th class="num">Commission threshold</th>
+              <th class="num">Commission</th>
+              <th class="num">Total before tax</th>
+              <th class="num">Tax rate</th>
+              <th class="num">Tax threshold</th>
+              <th class="num">Tax deducted</th>
+              <th class="num">Net wages</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="num">1</td>
+              <td>Frank</td>
+              <td class="num">€22.00</td>
+              <td class="num">40</td>
+              <td class="num">€880.00</td>
+              <td class="num">€800.00</td>
+              <td class="num">10%</td>
+              <td class="num">€500.00</td>
+              <td class="num">€30.00</td>
+              <td class="num">€910.00</td>
+              <td class="num">41%</td>
+              <td class="num">€500.00</td>
+              <td class="num">€168.10</td>
+              <td class="num">€741.90</td>
+            </tr>
+            <tr>
+              <td class="num">2</td>
+              <td>Sarah</td>
+              <td class="num">€21.00</td>
+              <td class="num">40</td>
+              <td class="num">€840.00</td>
+              <td class="num">€900.00</td>
+              <td class="num">12%</td>
+              <td class="num">€500.00</td>
+              <td class="num">€48.00</td>
+              <td class="num">€888.00</td>
+              <td class="num">41%</td>
+              <td class="num">€500.00</td>
+              <td class="num">€159.08</td>
+              <td class="num">€728.92</td>
+            </tr>
+            <tr>
+              <td class="num">4</td>
+              <td>James</td>
+              <td class="num">€20.00</td>
+              <td class="num">35</td>
+              <td class="num">€700.00</td>
+              <td class="num">€1,000.00</td>
+              <td class="num">11%</td>
+              <td class="num">€400.00</td>
+              <td class="num">€66.00</td>
+              <td class="num">€766.00</td>
+              <td class="num">41%</td>
+              <td class="num">€500.00</td>
+              <td class="num">€109.06</td>
+              <td class="num">€656.94</td>
+            </tr>
+            <tr>
+              <td class="num">6</td>
+              <td>David</td>
+              <td class="num">€15.00</td>
+              <td class="num">40</td>
+              <td class="num">€600.00</td>
+              <td class="num">€600.00</td>
+              <td class="num">10%</td>
+              <td class="num">€300.00</td>
+              <td class="num">€30.00</td>
+              <td class="num">€630.00</td>
+              <td class="num">23%</td>
+              <td class="num">€300.00</td>
+              <td class="num">€75.90</td>
+              <td class="num">€554.10</td>
+            </tr>
+            <tr>
+              <td class="num">7</td>
+              <td>Sinead</td>
+              <td class="num">€23.00</td>
+              <td class="num">30</td>
+              <td class="num">€690.00</td>
+              <td class="num">€400.00</td>
+              <td class="num">11%</td>
+              <td class="num">€400.00</td>
+              <td class="num">€0.00</td>
+              <td class="num">€690.00</td>
+              <td class="num">23%</td>
+              <td class="num">€300.00</td>
+              <td class="num">€89.70</td>
+              <td class="num">€600.30</td>
+            </tr>
+            <tr>
+              <td class="num">8</td>
+              <td>Aoife</td>
+              <td class="num">€19.00</td>
+              <td class="num">40</td>
+              <td class="num">€760.00</td>
+              <td class="num">€1,100.00</td>
+              <td class="num">12%</td>
+              <td class="num">€500.00</td>
+              <td class="num">€72.00</td>
+              <td class="num">€832.00</td>
+              <td class="num">41%</td>
+              <td class="num">€500.00</td>
+              <td class="num">€136.12</td>
+              <td class="num">€695.88</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
 
     const quizData = [
       {
@@ -356,28 +536,28 @@
         question: "The number of cookies downloaded from a page on a website in one day is best classified as:",
         options: ["Data", "Information", "Knowledge", "A strategic decision"],
         correct: "Information",
-        explanation: "It is a processed count summarising raw website events over a defined period, so it is information rather than a single raw fact."
+        explanation: "It is a processed count summarising raw website events over a defined period, so it is information."
       },
       {
         topic: "Data, Information and Knowledge",
         question: "A cookie downloaded from a webpage onto a visitor’s computer is best classified as:",
         options: ["Data", "Information", "Knowledge", "A management report"],
         correct: "Data",
-        explanation: "The individual cookie event is a raw fact captured by the system before being processed into totals or reports."
+        explanation: "The individual cookie event is a raw fact captured by the system before being processed."
       },
       {
         topic: "Data, Information and Knowledge",
         question: "The number of staff required to handle requests from a website is best classified as:",
         options: ["Data", "Information", "Knowledge", "A primary key"],
         correct: "Knowledge",
-        explanation: "This uses information about demand to support an operational staffing decision, so it is knowledge applied to action."
+        explanation: "This applies information about website demand to make a staffing decision."
       },
       {
         topic: "Data, Information and Knowledge",
         question: "The business card of a contact met at a sales conference is best classified as:",
         options: ["Data", "Information", "Knowledge", "A transaction processing stage"],
         correct: "Data",
-        explanation: "A business card contains raw facts such as name, job title, company, phone number and email address."
+        explanation: "A business card contains raw facts such as name, company, job title, phone number and email."
       },
       {
         topic: "Data, Information and Knowledge",
@@ -391,7 +571,7 @@
         question: "The weekly sales target for one sales representative is best classified as:",
         options: ["Data", "Information", "Knowledge", "A telecommunications channel"],
         correct: "Knowledge",
-        explanation: "A target is set by applying business judgement and previous information to guide future performance."
+        explanation: "A target is set by applying business judgement and previous information to guide future action."
       },
       {
         topic: "Data, Information and Knowledge",
@@ -417,7 +597,7 @@
           "Primary key, query, form, report only"
         ],
         correct: "Input, processing, output, storage/feedback",
-        explanation: "The standard cycle begins with input data, processes it, produces output and stores or feeds back results for future use."
+        explanation: "The cycle begins with input data, processes it, produces output and stores or feeds back results."
       },
       {
         topic: "Decision Types",
@@ -432,18 +612,6 @@
         explanation: "Routine structured decisions are common at operational level, semi-structured decisions at tactical level and novel unstructured decisions at strategic level."
       },
       {
-        topic: "Decision Types",
-        question: "Which is the best example of an unstructured decision?",
-        options: [
-          "Choosing whether to enter a new international market",
-          "Calculating commission using a fixed formula",
-          "Printing a weekly sales report",
-          "Looking up a staff member by Staff ID"
-        ],
-        correct: "Choosing whether to enter a new international market",
-        explanation: "Entering a new market is complex, uncertain and non-routine, making it an unstructured strategic decision."
-      },
-      {
         topic: "Competitive Advantage",
         question: "Which set best represents four common ways information systems can help create competitive advantage?",
         options: [
@@ -453,7 +621,7 @@
           "Using a homepage, hyperlink, CSS rule and spreadsheet cell"
         ],
         correct: "Cost leadership, differentiation, innovation and customer/supplier intimacy",
-        explanation: "Information systems can reduce costs, support differentiated services, enable new products and strengthen relationships with customers and suppliers."
+        explanation: "Information systems can reduce costs, improve products or services, support innovation and strengthen relationships."
       },
       {
         topic: "Transaction Processing Systems",
@@ -465,7 +633,7 @@
           "Writing an essay on database theory"
         ],
         correct: "Recording sales, payments, bookings or payroll transactions accurately and routinely",
-        explanation: "TPSs handle high-volume, routine business transactions such as sales, orders, payments, bookings and payroll."
+        explanation: "TPSs handle high-volume, routine business transactions such as sales, orders, payments and payroll."
       },
       {
         topic: "Transaction Processing Systems",
@@ -477,7 +645,7 @@
           "Searching, indexing, ranking, advertising, blogging"
         ],
         correct: "Data entry, validation, processing, storage, output/reporting",
-        explanation: "A TPS captures transaction data, checks it, processes it, stores it and produces outputs such as receipts or reports."
+        explanation: "A TPS captures transaction data, checks it, processes it, stores it and produces outputs."
       },
       {
         topic: "Information Systems Components",
@@ -489,29 +657,19 @@
           "Terminals, routers, clouds and cookies only"
         ],
         correct: "Hardware, software, people and data",
-        explanation: "The question specifically asks for the roles of hardware, software, people and data in an information system."
-      },
-      {
-        topic: "Information Systems Components",
-        question: "In an information system, which example is software?",
-        options: [
-          "Microsoft Access used to manage records",
-          "A keyboard used to type data",
-          "A sales manager using reports",
-          "A customer telephone number"
-        ],
-        correct: "Microsoft Access used to manage records",
-        explanation: "Software is the program or application that processes, stores or presents data, such as Access, Excel or a payroll system."
+        explanation: "The exam asks for hardware, software, people and data as information system components."
       },
       {
         topic: "Spreadsheet Formulas",
-        question: "In the wages spreadsheet, cell I7 contains IF(F7>H7, (F7-H7)*G7, 0). If F7 is €400, H7 is €400 and G7 is 11%, what is the result?",
+        exhibit: "wages",
+        question: "In the wages spreadsheet, cell I7 contains the formula below. If F7 is €400, H7 is €400 and G7 is 11%, what is the result?\n\nIF(F7>H7, (F7-H7)*G7, 0)",
         options: ["0", "€44.00", "€400.00", "€11.00"],
         correct: "0",
         explanation: "The test F7>H7 is false because €400 is not greater than €400. Therefore the IF statement returns 0."
       },
       {
         topic: "Spreadsheet Formulas",
+        exhibit: "wages",
         question: "What does IF(F7>H7, (F7-H7)*G7, 0) calculate in the wages spreadsheet?",
         options: [
           "Commission on sales above the commission threshold, otherwise zero",
@@ -524,20 +682,23 @@
       },
       {
         topic: "Spreadsheet Lookup",
-        question: "In the Autumn paper, what would VLOOKUP(4, $A$3:$N$8, 4, FALSE) return from the wages table?",
+        exhibit: "wages",
+        question: "In the Autumn paper, what would this lookup return?\n\nVLOOKUP(4, $A$3:$N$8, 4, FALSE)",
         options: ["35", "James", "€700.00", "€656.94"],
         correct: "35",
-        explanation: "The lookup finds Staff no 4, which is James. The fourth column in A:N is Hours worked, and James worked 35 hours."
+        explanation: "The lookup finds Staff no 4, James. The fourth column in A:N is Hours worked, and James worked 35 hours."
       },
       {
         topic: "Spreadsheet Lookup",
-        question: "In the Summer paper, what would VLOOKUP(6, $A$3:$N$8, 10, FALSE) return from the wages table?",
+        exhibit: "wages",
+        question: "In the Summer paper, what would this lookup return?\n\nVLOOKUP(6, $A$3:$N$8, 10, FALSE)",
         options: ["€630.00", "David", "40", "€554.10"],
         correct: "€630.00",
         explanation: "The lookup finds Staff no 6, David. The tenth column in A:N is Total before tax, which is €630.00."
       },
       {
         topic: "Spreadsheet Lookup",
+        exhibit: "wages",
         question: "In VLOOKUP(6, $A$3:$N$8, 10, FALSE), what does FALSE require?",
         options: [
           "An exact match for the lookup value",
@@ -559,18 +720,6 @@
         ],
         correct: "Using a pivot table to summarise sales by region and test management decisions",
         explanation: "A spreadsheet supports decision making when it analyses data, models outcomes or summarises information for managers."
-      },
-      {
-        topic: "Decision Support Systems",
-        question: "Which set contains examples of spreadsheet-based DSS uses mentioned in the exam?",
-        options: [
-          "Pivot tables, probability calculations and accounting applications",
-          "Hyperlinks, homepages and browser bookmarks",
-          "Terminals, channels and telecommunications processors",
-          "Primary keys, foreign keys and subforms only"
-        ],
-        correct: "Pivot tables, probability calculations and accounting applications",
-        explanation: "The exam explicitly names pivot tables, probability calculations and accounting applications as spreadsheet DSS examples."
       },
       {
         topic: "Internet of Things",
@@ -597,42 +746,6 @@
         explanation: "IoT systems depend on sensing, communication, processing and response."
       },
       {
-        topic: "Internet of Things",
-        question: "Which is the best IoT example in transport?",
-        options: [
-          "GPS and vehicle sensors sending live traffic or fleet data",
-          "A printed bus timetable locked in an office",
-          "A business card from a sales conference",
-          "A spreadsheet cell containing plain text only"
-        ],
-        correct: "GPS and vehicle sensors sending live traffic or fleet data",
-        explanation: "Transport IoT often uses connected vehicles, GPS and sensors to monitor location, traffic, maintenance or routing."
-      },
-      {
-        topic: "Internet of Things",
-        question: "Which is the best IoT example in retailing?",
-        options: [
-          "Smart shelves or RFID tags monitoring stock levels automatically",
-          "A paper receipt stored in a drawer",
-          "A static poster in a shop window",
-          "A one-to-one database relationship"
-        ],
-        correct: "Smart shelves or RFID tags monitoring stock levels automatically",
-        explanation: "Retail IoT can use connected tags, beacons or shelves to track stock and customer activity."
-      },
-      {
-        topic: "Internet of Things",
-        question: "Which is the best IoT example in health and fitness?",
-        options: [
-          "A wearable fitness tracker measuring heart rate and steps",
-          "A handwritten exercise diary only",
-          "A printed network diagram",
-          "A local text file with no sensor data"
-        ],
-        correct: "A wearable fitness tracker measuring heart rate and steps",
-        explanation: "Wearables are connected devices that collect health or activity data and transmit it for analysis."
-      },
-      {
         topic: "Web Design Tools",
         question: "Which statement best distinguishes Notepad++ from Dreamweaver as a web page editor?",
         options: [
@@ -642,7 +755,7 @@
           "They are identical in purpose and interface"
         ],
         correct: "Notepad++ is mainly a code editor, while Dreamweaver offers more visual web design and site-management features",
-        explanation: "Notepad++ is suited to editing code directly. Dreamweaver provides a more integrated web design environment with visual and site tools."
+        explanation: "Notepad++ is suited to editing code directly. Dreamweaver provides a more integrated visual web design environment."
       },
       {
         topic: "Stylesheets",
@@ -657,25 +770,6 @@
         explanation: "CSS stylesheets separate design from structure, making web pages easier to maintain and more consistent."
       },
       {
-        topic: "Stylesheets",
-        question: "Which pair gives two strong reasons for using stylesheets?",
-        options: [
-          "Consistent formatting across pages and easier maintenance",
-          "Exact-match lookup and approximate-match lookup",
-          "Primary keys and foreign keys",
-          "Data entry and validation only"
-        ],
-        correct: "Consistent formatting across pages and easier maintenance",
-        explanation: "A stylesheet allows many pages to share the same design and lets designers update appearance in one place."
-      },
-      {
-        topic: "CSS Layout",
-        question: "For the mobile CSS rule #top {position: absolute; width: 200px; margin-left:50px;} on a 400px wide screen, where does #top begin horizontally?",
-        options: ["50px from the left", "200px from the left", "400px from the left", "At the bottom of the screen"],
-        correct: "50px from the left",
-        explanation: "The margin-left value moves the absolutely positioned #top element 50 pixels from the left edge."
-      },
-      {
         topic: "CSS Layout",
         question: "For the mobile CSS rule #main {position: absolute; margin-top: 200px; margin-left: 100px; width: 300px;} on a 400px wide screen, which statement is most accurate?",
         options: [
@@ -686,18 +780,6 @@
         ],
         correct: "#main starts 100px from the left, 200px from the top, and extends to the 400px right edge",
         explanation: "A left margin of 100px plus a width of 300px fills the 400px screen width from x=100 to x=400."
-      },
-      {
-        topic: "CSS Layout",
-        question: "For the computer-screen CSS rule #top {position: absolute; width: 500px; margin-left:500px;} on a 1000px wide screen, which statement is most accurate?",
-        options: [
-          "#top occupies the right half of the screen",
-          "#top occupies the left half of the screen",
-          "#top is only 100px wide",
-          "#top begins at 0px and ends at 500px"
-        ],
-        correct: "#top occupies the right half of the screen",
-        explanation: "The element begins 500px from the left and has a width of 500px, so it spans x=500 to x=1000."
       },
       {
         topic: "Web Design Terms",
@@ -733,19 +815,7 @@
           "Transport, retailing, supply chain, fitness and smart cities"
         ],
         correct: "Terminals, computers, telecommunications processors, telecommunications channels and software",
-        explanation: "The Autumn paper asks for these five network components and their roles."
-      },
-      {
-        topic: "Networks",
-        question: "In a network, what is a telecommunications channel?",
-        options: [
-          "The medium or path used to carry data, such as fibre, Wi-Fi or mobile networks",
-          "The employee who approves payroll",
-          "A stylesheet rule for layout",
-          "A spreadsheet function for exact matching"
-        ],
-        correct: "The medium or path used to carry data, such as fibre, Wi-Fi or mobile networks",
-        explanation: "Telecommunications channels are the wired or wireless paths through which data travels."
+        explanation: "These are the five network components named in the exam."
       },
       {
         topic: "OSI Model",
@@ -757,7 +827,7 @@
           "Homepage, Hyperlink, Stylesheet, Browser, Server, Cookie, Cloud"
         ],
         correct: "Application, Presentation, Session, Transport, Network, Data Link, Physical",
-        explanation: "The OSI model is commonly listed from top to bottom as Application, Presentation, Session, Transport, Network, Data Link and Physical."
+        explanation: "The OSI model is commonly listed as Application, Presentation, Session, Transport, Network, Data Link and Physical."
       },
       {
         topic: "Cloud Computing",
@@ -769,7 +839,7 @@
           "A lookup formula in a spreadsheet"
         ],
         correct: "Using computing services such as storage, software or processing over the internet rather than only on local machines",
-        explanation: "Cloud computing delivers computing resources online, often on demand, such as Google Drive, Microsoft 365 or cloud hosting."
+        explanation: "Cloud computing delivers computing resources online, often on demand."
       },
       {
         topic: "Search Engines and Databases",
@@ -782,18 +852,6 @@
         ],
         correct: "Both collect, organise and index data so users can query it",
         explanation: "Search engines and databases both rely on organised data, indexes and queries to retrieve useful results."
-      },
-      {
-        topic: "Search Engines and Databases",
-        question: "In the search engine/database comparison, what is an index mainly used for?",
-        options: [
-          "Speeding up retrieval by pointing to where relevant data can be found",
-          "Replacing all source data with images",
-          "Making sure every record has no key",
-          "Changing a website’s colour scheme"
-        ],
-        correct: "Speeding up retrieval by pointing to where relevant data can be found",
-        explanation: "Indexes allow systems to locate matching records or pages efficiently rather than scanning everything from scratch."
       },
       {
         topic: "Database Relationships",
@@ -818,18 +876,6 @@
         ],
         correct: "The primary key from the one-side table is stored as a foreign key in the many-side table",
         explanation: "For example, Staff ID is the primary key in Staff and appears as a foreign key in Daily work."
-      },
-      {
-        topic: "Database Relationships",
-        question: "Which example best represents a many-to-many relationship?",
-        options: [
-          "Students and modules, where each student can take many modules and each module can have many students",
-          "One staff member and one unique staff locker only",
-          "One staff member and many daily work records only",
-          "One homepage and one hyperlink only"
-        ],
-        correct: "Students and modules, where each student can take many modules and each module can have many students",
-        explanation: "Many-to-many relationships usually require a linking table, such as Enrolments, to connect both sides."
       },
       {
         topic: "Staff Hours Database",
@@ -865,25 +911,6 @@
         explanation: "A date worked value should use a Date/Time data type so it can be sorted, filtered and used in date queries."
       },
       {
-        topic: "Database Implementation",
-        question: "Which data type is most appropriate for wage rate per hour?",
-        options: ["Currency or Number", "Yes/No", "Hyperlink", "OLE Object only"],
-        correct: "Currency or Number",
-        explanation: "Wage rates are numeric monetary values, so Currency or a suitable Number field is appropriate."
-      },
-      {
-        topic: "Forms and Subforms",
-        question: "Which form/subform design best suits the staff hours database?",
-        options: [
-          "A Staff form with a Daily work subform showing that staff member’s work records",
-          "A Homepage form with a Hyperlink subform",
-          "A Cloud form with an OSI subform",
-          "A CSS form with a Stylesheet subform"
-        ],
-        correct: "A Staff form with a Daily work subform showing that staff member’s work records",
-        explanation: "A form with subform is useful where one parent record, such as Staff, has many related child records, such as Daily work entries."
-      },
-      {
         topic: "Database Queries",
         question: "Which is a useful query for the staff hours database?",
         options: [
@@ -894,34 +921,10 @@
         ],
         correct: "Total hours worked by each staff member for a selected week",
         explanation: "This query would help calculate payroll or monitor staff workload."
-      },
-      {
-        topic: "Database Queries",
-        question: "Which set contains three useful queries for the staff hours database?",
-        options: [
-          "Hours by staff per week; staff above a selected number of hours; estimated wages by staff",
-          "Homepage colour; hyperlink destination; CSS font family",
-          "Cookie image size; browser theme; monitor brightness",
-          "Only first name, only surname, only telephone number with no calculations"
-        ],
-        correct: "Hours by staff per week; staff above a selected number of hours; estimated wages by staff",
-        explanation: "These queries use staff and daily work data to produce operational information for payroll and management."
-      },
-      {
-        topic: "Database Reports",
-        question: "The exam asks for a report useful in the context of the “mobile phone database,” although the surrounding question is about staff hours. What is the best response?",
-        options: [
-          "Acknowledge the wording may be a typo and give a relevant staff-hours report, such as weekly hours and wages by staff member",
-          "Ignore the staff-hours tables and invent a phone sales database",
-          "Say reports cannot be created in Access",
-          "Use a CSS stylesheet as the report"
-        ],
-        correct: "Acknowledge the wording may be a typo and give a relevant staff-hours report, such as weekly hours and wages by staff member",
-        explanation: "Because the database described is for staff hours, the safest answer is to note the likely wording issue and provide a relevant staff-hours report."
       }
     ];
 
-    const PASS_MARK = 50; // Edit this percentage if you want a different pass mark.
+    const PASS_MARK = 50;
 
     let currentQuestionIndex = 0;
     let score = 0;
@@ -935,19 +938,23 @@
 
     function shuffleArray(array) {
       const copy = [...array];
+
       for (let i = copy.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [copy[i], copy[j]] = [copy[j], copy[i]];
       }
+
       return copy;
     }
 
     function updateTopBar() {
       const total = quizData.length;
       const current = Math.min(currentQuestionIndex + 1, total);
+
       questionCounter.textContent = currentQuestionIndex < total
         ? `Question ${current} of ${total}`
-        : `Quiz complete`;
+        : "Quiz complete";
+
       scoreTracker.textContent = `Score: ${score}`;
       progressBar.style.width = `${(currentQuestionIndex / total) * 100}%`;
     }
@@ -1001,10 +1008,14 @@
       nextBtn.className = "nav-btn";
       nextBtn.type = "button";
       nextBtn.id = "nextBtn";
-      nextBtn.textContent = currentQuestionIndex === quizData.length - 1 ? "See results" : "Next question";
+      nextBtn.textContent = currentQuestionIndex === quizData.length - 1
+        ? "See results"
+        : "Next question";
       nextBtn.disabled = true;
+
       nextBtn.addEventListener("click", () => {
         currentQuestionIndex++;
+
         if (currentQuestionIndex < quizData.length) {
           renderQuestion();
         } else {
@@ -1015,15 +1026,24 @@
       nav.appendChild(nextBtn);
 
       section.appendChild(topic);
+
+      if (q.exhibit === "wages") {
+        const exhibit = document.createElement("div");
+        exhibit.innerHTML = wagesSpreadsheetHTML;
+        section.appendChild(exhibit);
+      }
+
       section.appendChild(question);
       section.appendChild(answers);
       section.appendChild(feedback);
       section.appendChild(nav);
+
       app.appendChild(section);
     }
 
     function selectAnswer(button, q, answersContainer) {
       if (answered) return;
+
       answered = true;
 
       const selected = button.dataset.option;
@@ -1039,11 +1059,14 @@
       });
 
       const allButtons = answersContainer.querySelectorAll(".answer-btn");
+
       allButtons.forEach(btn => {
         btn.disabled = true;
+
         if (btn.dataset.option === q.correct) {
           btn.classList.add("correct");
         }
+
         if (btn === button && !isCorrect) {
           btn.classList.add("incorrect");
         }
@@ -1098,7 +1121,6 @@
 
       const review = document.createElement("div");
       review.className = "review-list";
-      review.setAttribute("aria-label", "Answer review");
 
       userAnswers.forEach((item, index) => {
         const row = document.createElement("div");
@@ -1117,6 +1139,7 @@
       result.appendChild(passFail);
       result.appendChild(restart);
       result.appendChild(review);
+
       app.appendChild(result);
     }
 
